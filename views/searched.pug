@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 Hello
+
+
+  h4 enter an identifier code to get the sentiment for that outlet.
+
+  h2 Here are the latest articles from #{data.payload.name}
+
+  each provider in data.payload.articles
+    li  #{provider.author} :  #{provider.title} 
+    
+   
+  p NLP Sentiment analysis determined these stories have a sentiment of: #{data.sentiment}
