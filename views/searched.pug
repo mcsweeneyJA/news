@@ -1,15 +1,23 @@
 extends layout
 
+
 block content
-  h1 Hello
+  .container.center-align
+    h1 News Watch
 
 
-  h4 enter an identifier code to get the sentiment for that outlet.
-
-  h2 Here are the latest articles from #{data.payload.name}
-
-  each provider in data.payload.articles
-    li  #{provider.author} :  #{provider.title} 
+  .container
+    table.responsive-table.striped
+      thead
+        tr: h5.txt.center-align.teal-text.lighten-3 Recent Articles from:   #{data.payload.articles[0].author}
+      tbody
+      each provider in data.payload.articles
+        tr
+          td #{provider.author}
+          td #{provider.title} 
     
    
-  p NLP Sentiment analysis determined these stories have a sentiment of: #{data.sentiment}
+  .container.center-align
+    h3 NLP Sentiment analysis determined these stories have a sentiment of:
+    h2  #{data.aggregate}
+

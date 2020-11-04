@@ -1,13 +1,13 @@
 extends layout
 
 block content
-  h1 Hello
+  h1 Welcome to News Watch
   h3 This application tracks the 25 most recent articles from each news outlet 
   h3 and extracts a sentiment score. These scores are used to compare the outlook of each station. 
 
-  h4 enter an identifier code to get the sentiment for that outlet.
-
-  button Get all scores
+  h4 Navigate to the specific outlet you are interested in via the search route.
+  h4 Example: /search/abc-news-au
+  
 
   each provider in data
     li #{provider.id} : #{provider.id}

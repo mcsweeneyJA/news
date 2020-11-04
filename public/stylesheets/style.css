@@ -1,8 +1,67 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.container{
+  font-family: 'Work Sans', sans-serif;
+}
+.header{
+  font-family: 'Work Sans', sans-serif;
+
+}
+.txt{
+  font-family: 'Open Sans', sans-serif;
+  padding-bottom: 1em;
+  padding-top: 1em;
+}
+blockquote{
+  font-family: 'Open Sans', sans-serif;
+  padding-bottom: 1em;
+  background-color: #fafafa;
+  color: #ff8a80 ;
+}
+#a{
+  
+  padding: 2%;
+}
+#map {
+  margin:auto;
+  width:auto;
+  height: 850px;
 }
 
-a {
-  color: #00B7FF;
+#container{
+  padding: 1em;
+}
+#holder{
+  padding-top: 5em;
+  padding-left: 5em;
+  padding-right: 5em;
+}
+#top{
+  justify-content: center;
+}
+.item{
+  padding: 1%;
+}
+.h4{
+  padding-bottom: 2em;
+}
+
+#articleTitle{
+  width: 75%;
+  height: 75%;
+}
+#clicker{
+  padding: 1em;
+
+}
+#categoryButton{
+  padding: 1em;
+  
+  width: 75%;
+  height: 75%;
+}
+.mypopup.leaflet-popup-content-wrapper{
+  background-color: gray;
+  opacity: 0.9;
+}
+.mypopup.leaflet-popup-tip {
+  background: red;
 }

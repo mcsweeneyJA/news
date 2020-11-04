@@ -12,12 +12,12 @@ require("dotenv").config();
 const AWS = require("aws-sdk");
 // Cloud Services Set-up
 // Create unique bucket name
-// const bucketName = "mcsweeneyjac-news-store";
-// // Create a promise on S3 service object
-// const bucketPromise = new AWS.S3({ apiVersion: "2006-03-01" }).createBucket({ Bucket: bucketName }).promise();
-// bucketPromise.then(function (data) {console.log("Successfully created " + bucketName);}).catch(function (err) {
-//     console.error(err, err.stack);
-// });
+const bucketName = "n8886997mcsweeney";
+// Create a promise on S3 service object
+const bucketPromise = new AWS.S3({ apiVersion: "2006-03-01" }).createBucket({ Bucket: bucketName }).promise();
+bucketPromise.then(function (data) {console.log("Successfully created " + bucketName);}).catch(function (err) {
+    console.error(err, err.stack);
+});
 
 
 //////////////////// REDIS .//////////////////////////////////
@@ -29,60 +29,70 @@ redisClient.on("error", (err) => {
   console.log("Error " + err);
 });
 
-//GET all news articles matching a paramaterised title
+// the main search route
 router.get("/:search", function (req, res) {
-  // const { title } = req.params;
 
-  // var queryURI = encodeURI(title);
   const APIkey = "210d0241acc445e3b0603e086039cadc";
   var querySource = req.params.search;
-  // console.log(querySource);
+
   var queryString =
     "https://newsapi.org/v2/top-headlines?sources=" +
     querySource +
     "&apiKey=210d0241acc445e3b0603e086039cadc";
   const s3Key = `news-${querySource}`;
+
   //call the news api and search for the specific event
   // search for both TITLE and CONTENT, and limit to 1 page
+
   // Try the cache
-
-
   const redisKey = `newss:${querySource}`;
 
   return redisClient.get(redisKey, (err, result) => {
     if (result) {
       // Serve from Cache
       const resultJSON = JSON.parse(result);
-      console.log(resultJSON);
+      // console.log(resultJSON);
       const passThis = resultJSON.jsonSent;
       res.render("redisView", { data: passThis });
-      // return res.status(200).json(resultJSON);
+
     } else {
         
-    //     // Check S3
-    //     const params = { Bucket: bucketName, Key: s3Key };
+        // Check S3
+        const params = { Bucket: bucketName, Key: s3Key };
   
-    //     return new AWS.S3({ apiVersion: "2006-03-01" }).getObject(
-    //       params,
-    //       (err, result) => {
-    //         if (result) {
-    //           const resultJSON = JSON.parse(result);
-    //           console.log(result);
+        return new AWS.S3({ apiVersion: "2006-03-01" }).getObject(
+          params,
+          (err, result) => {
+            if (result) {
+              const resultJSON = JSON.parse(result.Body);
+              console.log(resultJSON.jsonSent);
               
-    //           res.render("searched", { data: resultJSON });
+              res.render("searched", { data: resultJSON.jsonSent });
               
-    //         } else {
+            } else {
                     return axios
                       .get(queryString)
                       .then((response) => {
                         const data = response.data;                       
-                        
-                        var tokenizedNews = tokenizer.tokenize(data.articles[0].description);
-                        var sentiments = analyzer.getSentiment(tokenizedNews);
+                        // console.log(data);
+                        var articleCounter = 0 ;
+                        var runningTotal = 0;
+
+                        data.articles.forEach((element) => {
+                          var tokenizedNews = tokenizer.tokenize(data.articles[articleCounter].description);
+                          var sentiments = analyzer.getSentiment(tokenizedNews);
+                          runningTotal += sentiments;
+                          articleCounter++;
+                        });
+
+                        var aggregateSentiment = runningTotal / articleCounter;
+
+
               
                         var resObj = {
                           payload: data,
-                          sentiment: sentiments,
+                          
+                          aggregate: aggregateSentiment
                         };
                         var jsonSent = resObj;
               
@@ -91,21 +101,21 @@ router.get("/:search", function (req, res) {
                             jsonSent,
                           });
                         
-                        // const objectParams = {
-                        //     Bucket: bucketName,
-                        //     Key: s3Key,
-                        //     Body: body,
-                        //   };
+                        const objectParams = {
+                            Bucket: bucketName,
+                            Key: s3Key,
+                            Body: body,
+                          };
                           
-                        // const uploadPromise = new AWS.S3({ apiVersion: "2006-03-01" })
-                        //   .putObject(objectParams)
-                        //   .promise();
+                        const uploadPromise = new AWS.S3({ apiVersion: "2006-03-01" })
+                          .putObject(objectParams)
+                          .promise();
 
-                        // uploadPromise.then(function (data) {
-                        //     console.log(
-                        //       "Successfully uploaded data to " + bucketName + "/" + s3Key
-                        //     );
-                        //   });
+                        uploadPromise.then(function (data) {
+                            console.log(
+                              "Successfully uploaded data to " + bucketName + "/" + s3Key
+                            );
+                          });
 
                         redisClient.setex(
                             redisKey,
@@ -118,8 +128,8 @@ router.get("/:search", function (req, res) {
             }
           }
         );
-      // }
-    // });
+      }
+    });
 });
 
 
